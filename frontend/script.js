@@ -30,6 +30,18 @@ const errorEl = document.getElementById("error");
  * Return the medicines array. Surface network/HTTP errors so the caller can show them.
  */
 async function fetchMedicines() {
+    try {
+      const response = await fetch(`${BASE_URL}/medicines`);
+
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch {
+      console.error(error.message);
+    }
     // TODO: fetch(`${BASE_URL}/medicines`), check response.ok, return the data.
 }
 
@@ -43,6 +55,40 @@ function renderMedicines(data) {
     // TODO: build a table (the .results styles expect a <table>), iterate the
     // records, and render each row safely. Use the .invalid class to flag bad
     // values if you like.
+    const rowdata = data.medicines.map(({ name, price }) => {
+      console.log({
+        name,
+        price,
+      });
+      const parseName = (name) => {
+        switch (name) {
+          case "":
+            return "No name";
+            break;
+          case null:
+            return "Null Name";
+            break;
+          case undefined:
+            return "Undefined Name";
+            break;
+
+          default:
+            return name;
+            break;
+        }
+      };
+      const validateData = (entry) => (!!entry ? "" : "invalid");
+
+      return `<tr>
+        <td class="${validateData(name)}">${parseName(name)}</td>
+        <td class="${validateData(price)}">${!!price ? price : 0}</td>
+      </tr>`;
+    });
+
+    const table = document.createElement("table");
+    table.innerHTML = rowdata.join("\n");
+
+    document.getElementById("results").appendChild(table);
 }
 
 /**
@@ -57,6 +103,18 @@ async function fetchUnreliable() {
 
 // ---- Button wiring (already works - no need to change) ----
 document.getElementById("load-medicines").addEventListener("click", async () => {
+    try {
+      const data = await fetchMedicines();
+      if (!data) {
+        throw new Error("Data not found");
+      }
+      renderMedicines(data);
+    } catch (error) {
+      console.error(error);
+    }
+    
+    
+    
     // TODO: call fetchMedicines() then renderMedicines(data),
     // showing #loading and clearing #error appropriately.
 });
