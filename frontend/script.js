@@ -99,6 +99,20 @@ function renderMedicines(data) {
  */
 async function fetchUnreliable() {
     // TODO: implement the retry loop here.
+    try {
+      const response = await fetch(`${BASE_URL}/medicines/unreliable`);
+
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log({ result });
+
+      return result;
+    } catch {
+      console.error(error.error);
+    }
 }
 
 // ---- Button wiring (already works - no need to change) ----
@@ -120,5 +134,10 @@ document.getElementById("load-medicines").addEventListener("click", async () => 
 });
 
 document.getElementById("load-unreliable").addEventListener("click", async () => {
+    try {
+      await fetchUnreliable();
+    } catch (error) {
+      console.error(error);
+    }
     // TODO: call fetchUnreliable().
 });
